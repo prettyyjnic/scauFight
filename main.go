@@ -55,12 +55,12 @@ func loginIn()(map[string]string, error){
 		"RadioButtonList1":   "学生",
 		"Button1":   "登录",
 	}
-	 respBytes,cookies, err:= post(loginUrl, loginData, nil)
-	 if err!=nil {
-		 fmt.Println("error:",err.Error())
-	 }
-	 fmt.Println("resp:",string(respBytes))
-	 fmt.Println("cookies:",cookies)
+	respBytes,cookies, err:= post(loginUrl, loginData, nil)
+	if err!=nil {
+		fmt.Println("error:",err.Error())
+	}
+	fmt.Println("resp:",string(respBytes))
+	fmt.Println("cookies:",cookies)
 	return nil,nil
 }
 
