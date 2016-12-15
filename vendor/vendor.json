@@ -23,6 +23,12 @@
 			"revisionTime": "2015-09-15T16:53:35Z"
 		},
 		{
+			"checksumSHA1": "WUBkjHxySczF0k62u6kUmvatrJM=",
+			"path": "github.com/larspensjo/config",
+			"revision": "b6db95dc6321c46dab9cd53d0c85164a27686aa6",
+			"revisionTime": "2016-02-28T17:28:12Z"
+		},
+		{
 			"checksumSHA1": "KtVDqWiNNB+F63Gu881taY3OyhM=",
 			"path": "github.com/mozillazg/request",
 			"revision": "27533b4a60c41069f545bacdb23f878e8dae41b2",
