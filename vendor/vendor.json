@@ -3,8 +3,18 @@
 	"ignore": "test",
 	"package": [
 		{
+			"path": "code.google.com/p/mahonia",
+			"revision": ""
+		},
+		{
 			"path": "github.com/PuerkitoBio/goquery",
 			"revision": ""
+		},
+		{
+			"checksumSHA1": "ucu0eJ90b2Jlj+KPt0YJzGfwm7s=",
+			"path": "github.com/axgle/mahonia",
+			"revision": "c528b747d92d41ca581a7acf3e604c396fc7c034",
+			"revisionTime": "2015-10-19T00:40:08Z"
 		},
 		{
 			"checksumSHA1": "4+wnUoVOdK9cHy7rqdQdweYKiOA=",
@@ -79,5 +89,5 @@
 			"revisionTime": "2016-11-30T21:25:21Z"
 		}
 	],
-	"rootPath": "github.com/prettyyjnic/scau-fight"
+	"rootPath": "github.com/prettyyjnic/scauFight"
 }
