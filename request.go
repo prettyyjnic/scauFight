@@ -22,8 +22,8 @@ var (
 
 func init() {
 	c = new(http.Client)
-	enc = mahonia.NewEncoder("gbk")
-	dec = mahonia.NewDecoder("gbk")
+	enc = mahonia.NewEncoder("GBK")
+	dec = mahonia.NewDecoder("GBK")
 }
 
 func doRequest(url string, method string, data map[string]string, cookies []*http.Cookie, headers map[string]string) ([]byte, []*http.Cookie, error) {
@@ -32,7 +32,12 @@ func doRequest(url string, method string, data map[string]string, cookies []*htt
 	req.Data = make(map[string]string)
 	if data != nil { // 转化为gbk
 		for k, v := range data {
-			req.Data[enc.ConvertString(k)] = enc.ConvertString(v)
+			if k == "TextBox1" { // 特殊处理
+				req.Data[k] = v
+			} else {
+				req.Data[enc.ConvertString(k)] = enc.ConvertString(v)
+			}
+			// req.Data[k] = enc.ConvertString(v)
 		}
 	}
 	if cookies != nil {

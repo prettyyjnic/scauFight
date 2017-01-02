@@ -6,6 +6,16 @@ import "github.com/PuerkitoBio/goquery"
 import "bytes"
 import "log"
 
+const (
+	// AREA_ZHUXIAOQU 主校区
+	AREA_ZHUXIAOQU = "1"
+	// AREA_DONGQU 东区
+	AREA_DONGQU = "2"
+	// AREA_QILIN 启林
+	AREA_QILIN = "3"
+)
+
+// GetChineseClass 获取语文课信息
 func (student *StudentStruct) GetChineseClass() ([]byte, error) {
 	if student.cookies == nil || len(student.cookies) == 0 {
 		err := student.LoginIn()
@@ -20,11 +30,47 @@ func (student *StudentStruct) GetChineseClass() ([]byte, error) {
 	return respBytes, err
 }
 
-func (student *StudentStruct) FightChineseClass(classCode string) ([]byte, error) {
-	resp, err := student.GetChineseClass()
+// FightChineseClassByClassCode 根据课程code抢课
+func (student *StudentStruct) FightChineseClassByClassCode(classCode string) ([]byte, error) {
+	respBytes, err := student.GetChineseClass()
 	if err != nil {
 		return nil, err
 	}
+	return student.fightChineseClass(respBytes, classCode)
+}
+
+// FightChineseClassByClassName 根据课程信息抢课, 第一个参数 课程名称， 第二个参数 教师名称， 第三个参数 上课时间
+func (student *StudentStruct) FightChineseClassByClassName(args ...string) ([]byte, error) {
+	respBytes, err := student.GetChineseClass()
+	if err != nil {
+		return nil, err
+	}
+	var className string
+	var teacherName string
+	var courseTime string
+	for i, info := range args {
+		switch i {
+		case 0:
+			className = info
+		case 1:
+			teacherName = info
+		case 2:
+			courseTime = info
+		default:
+			log.Println("仅支持3个参数")
+		}
+	}
+	// 解析获取课程的 code
+	classCode, err := getChineseClassCodeByClassInfo(respBytes, className, teacherName, courseTime)
+	if err != nil {
+		return nil, err
+	}
+	return student.fightChineseClass(respBytes, classCode)
+}
+
+// 发送抢语文课请求
+func (student *StudentStruct) fightChineseClass(resp []byte, classCode string) ([]byte, error) {
+	var err error
 	__VIEWSTATE, __VIEWSTATEGENERATOR := getViewState(resp)
 	params := map[string]string{
 		"__VIEWSTATE":          string(__VIEWSTATE),
@@ -49,18 +95,106 @@ func (student *StudentStruct) FightChineseClass(classCode string) ([]byte, error
 	return resp, nil
 }
 
-func (student *StudentStruct) FightChineseClassByClassName(className string, teacherName string, courseTime string) ([]byte, error) {
-	resp, err := student.GetChineseClass()
+// GetPublicClass 获取A系列课程信息
+func (student *StudentStruct) GetPublicClass() ([]byte, error) {
+	if student.cookies == nil || len(student.cookies) == 0 {
+		err := student.LoginIn()
+		if err != nil {
+			return nil, err
+		}
+	}
+	headers := map[string]string{
+		"Referer": zhengFang.mainURL + student.xuehao,
+	}
+	respBytes, _, err := get(zhengFang.publicClassURL+student.xuehao, nil, student.cookies, headers)
+	return respBytes, err
+}
+
+// FightPublicClassByClassInfo 抢公选课,第一个参数 课程名称，第二个参数 教师名称，第三个参数 上课时间，第四个参数 上课校区, 第五个参数 课程归属
+func (student *StudentStruct) FightPublicClassByClassInfo(args ...string) ([]byte, error) {
+	var className string
+	var teacherName string
+	var courseTime string
+	var courseBelongTo string
+	var courseArea string
+	courseArea = AREA_DONGQU
+	var __VIEWSTATE []byte
+	var __VIEWSTATEGENERATOR []byte
+	for i, info := range args {
+		switch i {
+		case 0:
+			className = info
+		case 1:
+			teacherName = info
+		case 2:
+			courseTime = info
+		case 3:
+			courseArea = info
+		case 4:
+			courseBelongTo = info
+		default:
+			log.Println("仅支持5个参数")
+		}
+	}
+	respBytes, err := student.GetPublicClass() // 获取__VIEWSTATE 和 __VIEWSTATEGENERATOR
+	log.Println("获取公选课成功")
 	if err != nil {
 		return nil, err
 	}
-	// 解析获取课程的 code
+	__VIEWSTATE, __VIEWSTATEGENERATOR = getViewState(respBytes)
+	// 查找课程
+	headers := map[string]string{
+		"Referer": zhengFang.publicClassURL + student.xuehao,
+	}
+	params := map[string]string{
+		"TextBox1":             className,
+		"Button2":              "确定",
+		"ddl_kcxz":             "",
+		"ddl_ywyl":             "",
+		"ddl_xqbs":             courseArea,
+		"ddl_sksj":             courseTime,
+		"ddl_kcgs":             courseBelongTo,
+		"__VIEWSTATE":          string(__VIEWSTATE),
+		"__VIEWSTATEGENERATOR": string(__VIEWSTATEGENERATOR),
+	}
+	log.Println("查找公选课" + className)
+	respBytes, _, err = post(zhengFang.publicClassURL+student.xuehao, params, student.cookies, headers)
+	if err != nil {
+		return nil, err
+	}
+	code, err := getPublicClassCodeByClassInfo(respBytes, className, teacherName, courseTime)
+	if err != nil {
+		return nil, err
+	}
+	__VIEWSTATE, __VIEWSTATEGENERATOR = getViewState(respBytes)
+	params2 := map[string]string{
+		"__VIEWSTATE":          string(__VIEWSTATE),
+		"__VIEWSTATEGENERATOR": string(__VIEWSTATEGENERATOR),
+		code:      "on",
+		"Button1": "提交",
+	}
+	log.Println("发送选课请求")
+	respBytes, _, err = post(zhengFang.publicClassURL+student.xuehao, params2, student.cookies, headers)
+	if err != nil {
+		return nil, err
+	}
+	reg := regexp.MustCompile(`<script language='javascript'>alert\('(.*)'\);</script>`)
+	matches := reg.FindSubmatch(respBytes)
+
+	if len(matches) > 1 {
+		return nil, errors.New("抢课失败" + string(matches[1]))
+	}
+	return respBytes, nil
+}
+
+// 根据课程信息查找语文课程code
+func getChineseClassCodeByClassInfo(resp []byte, className string, teacherName string, courseTime string) (string, error) {
 	document, err := goquery.NewDocumentFromReader(bytes.NewReader(resp))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	var classCode string
-	document.Find("table.datelist tr.alt").Each(func(i int, tr *goquery.Selection) {
+	document.Find("table.datelist tr").Each(func(i int, tr *goquery.Selection) {
 		isMatch := true
 		tr.Find("td").Each(func(k int, td *goquery.Selection) {
 			if classCode != "" || !isMatch {
@@ -92,28 +226,50 @@ func (student *StudentStruct) FightChineseClassByClassName(className string, tea
 		})
 	})
 	if classCode == "" {
-		return nil, errors.New("找不到课程！")
+		return classCode, errors.New("找不到课程！")
+	} else {
+		return classCode, nil
 	}
-	__VIEWSTATE, __VIEWSTATEGENERATOR := getViewState(resp)
-	params := map[string]string{
-		"__VIEWSTATE":          string(__VIEWSTATE),
-		"__VIEWSTATEGENERATOR": string(__VIEWSTATEGENERATOR),
-		"Button1":              "提交",
-		classCode:              "on",
-	}
-	headers := map[string]string{
-		"Referer":                   zhengFang.chineseURL + student.xuehao,
-		"Upgrade-Insecure-Requests": "1",
-	}
-	resp, _, err = post(zhengFang.chineseURL+student.xuehao, params, student.cookies, headers)
-	if err != nil {
-		return nil, err
-	}
-	reg := regexp.MustCompile(`<script language='javascript'>alert\('(.*)'\);</script>`)
-	matches := reg.FindSubmatch(resp)
+}
 
-	if len(matches) > 1 {
-		return nil, errors.New("抢课失败" + string(matches[1]))
+// 根据课程信息查找公选课程code
+func getPublicClassCodeByClassInfo(resp []byte, className string, teacherName string, courseTime string) (string, error) {
+	document, err := goquery.NewDocumentFromReader(bytes.NewReader(resp))
+	if err != nil {
+		return "", err
 	}
-	return resp, nil
+	var classCode string
+	document.Find("table#kcmcGrid tr").Each(func(i int, tr *goquery.Selection) {
+		if classCode != "" {
+			return
+		}
+		tr.Find("td").Each(func(k int, td *goquery.Selection) {
+			switch k {
+			case 2:
+				if className != td.First().Text() {
+					classCode = ""
+					return
+				}
+			case 4:
+				if teacherName != "" && teacherName != td.First().Text() {
+					classCode = ""
+					return
+				}
+			case 5:
+				if courseTime != "" && courseTime != td.First().Text() {
+					classCode = ""
+					return
+				}
+			case 0:
+				node := td.First().Find("input").First()
+				classCode = node.AttrOr("name", "")
+			}
+		})
+	})
+	if classCode == "" {
+		return classCode, errors.New("找不到课程！")
+	} else {
+		log.Println("获取课程成功：", classCode)
+		return classCode, nil
+	}
 }

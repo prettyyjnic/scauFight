@@ -9,11 +9,12 @@ import (
 const HTTP_MAX_TRY_TIMES = 3
 
 var zhengFang struct {
-	baseURL    string
-	loginURL   string
-	codeURL    string
-	chineseURL string
-	mainURL    string
+	baseURL        string
+	loginURL       string
+	codeURL        string
+	chineseURL     string
+	publicClassURL string
+	mainURL        string
 }
 var Config *config.Config
 
@@ -33,4 +34,5 @@ func init() {
 	zhengFang.mainURL = zhengFang.baseURL + "/xs_main.aspx?xh="
 	zhengFang.codeURL = zhengFang.baseURL + "/CheckCode.aspx"
 	zhengFang.chineseURL = zhengFang.baseURL + "/xf_xstyxk_qtk.aspx?xh="
+	zhengFang.publicClassURL = zhengFang.baseURL + "/xf_xsqxxxk.aspx?xh="
 }

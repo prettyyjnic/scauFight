@@ -3,6 +3,7 @@ package scauFight
 import "regexp"
 
 import "errors"
+import "log"
 
 func getViewState(respByte []byte) ([]byte, []byte) {
 	reg := regexp.MustCompile(`<input type="hidden" name="__VIEWSTATE" value="(.*)" />`)
@@ -54,5 +55,6 @@ func (student *StudentStruct) LoginIn() error {
 	if len(matches) > 0 {
 		return errors.New("登录失败" + string(matches[0]))
 	}
+	log.Println("登录成功！")
 	return nil
 }
