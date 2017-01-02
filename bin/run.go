@@ -20,9 +20,8 @@ func main() {
 	if err != nil {
 		panic("密码配置错误！")
 	}
-
-	student := scauFight.NewStudent(xuehao, password)
-	fightClassA(student)
+	className := "中国哲学智慧与现代企业管理"
+	fightClassAUntilSuccess(xuehao, password, className)
 }
 
 func fightWithCode(student *scauFight.StudentStruct) {
@@ -36,23 +35,50 @@ func fightWithCode(student *scauFight.StudentStruct) {
 	}
 }
 
-func fightWithClassName(student *scauFight.StudentStruct) {
+func fightWithClassName(student *scauFight.StudentStruct) error {
 	className := "大学语文"
 	teacherName := "杨汤琛"
-	response, err := student.FightChineseClassByClassName(className, teacherName, "")
+	_, err := student.FightChineseClassByClassName(className, teacherName, "")
 	if err != nil {
 		log.Fatalln(err)
 	} else {
-		log.Println(string(response))
+		log.Println("抢课成功！")
 	}
+	return err
 }
 
-func fightClassA(student *scauFight.StudentStruct) {
-	className := "中国哲学智慧与现代企业管理"
-	response, err := student.FightPublicClassByClassInfo(className)
+func fightClassA(student *scauFight.StudentStruct, className string) error {
+
+	_, err := student.FightPublicClassByClassInfo(className)
 	if err != nil {
 		log.Fatalln(err)
 	} else {
-		log.Println(string(response))
+		log.Println("抢课成功！")
+	}
+	return err
+}
+
+func fightClassAUntilSuccess(xuehao string, password string, className string) {
+	var channel chan int
+	var maxChannel = 10
+	var successChannel chan int
+	successChannel = make(chan int)
+	channel = make(chan int, maxChannel)
+	for {
+		channel <- 1
+		go func() {
+			defer func() {
+				<-channel
+			}()
+			student := scauFight.NewStudent(xuehao, password)
+			err := fightClassA(student, className)
+			if err == nil {
+				successChannel <- 1
+			}
+		}()
+	}
+
+	for {
+		<-successChannel
 	}
 }
