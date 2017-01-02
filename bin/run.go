@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/prettyyjnic/scauFight"
+	"github.com/prettyyjnic/scau-fight"
 )
 
 func main() {
@@ -22,13 +22,13 @@ func main() {
 	}
 
 	student := scauFight.NewStudent(xuehao, password)
-	fightWithClassName(student)
+	fightClassA(student)
 }
 
 func fightWithCode(student *scauFight.StudentStruct) {
 	// 抢中文课,修改该字段为要抢的课程的code（右键审查元素查看要选的课程的checkbox的name ）
 	courseCode := "kcmcGrid:_ctl4:xk"
-	response, err := student.FightChineseClass(courseCode)
+	response, err := student.FightChineseClassByClassCode(courseCode)
 	if err != nil {
 		log.Fatalln(err)
 	} else {
@@ -40,6 +40,16 @@ func fightWithClassName(student *scauFight.StudentStruct) {
 	className := "大学语文"
 	teacherName := "杨汤琛"
 	response, err := student.FightChineseClassByClassName(className, teacherName, "")
+	if err != nil {
+		log.Fatalln(err)
+	} else {
+		log.Println(string(response))
+	}
+}
+
+func fightClassA(student *scauFight.StudentStruct) {
+	className := "中国哲学智慧与现代企业管理"
+	response, err := student.FightPublicClassByClassInfo(className)
 	if err != nil {
 		log.Fatalln(err)
 	} else {
