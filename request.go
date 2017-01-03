@@ -10,6 +10,8 @@ import (
 
 	"bytes"
 
+	"strings"
+
 	"github.com/axgle/mahonia"
 	"github.com/mozillazg/request"
 )
@@ -78,6 +80,7 @@ func checkResult(respBytes []byte) error {
 		[]byte("出错啦"),
 		[]byte("请重新登陆"),
 		[]byte("Object moved"),
+		[]byte("Service Unavailable"),
 		[]byte("Location: /logout.aspx"),
 	}
 	for _, v := range unCorrectBytes {
@@ -109,6 +112,10 @@ func getCode(codeURL string, cookies []*http.Cookie) (string, error) {
 		return "", err
 	}
 	respByte, _ := ioutil.ReadAll(resp.Body)
+	// fmt.Println("respByte", string(respByte))
+	if strings.Contains(string(respByte), "Service Unavailable") {
+		return "", errors.New("正方发生错误Service Unavailable")
+	}
 	ioutil.WriteFile("code.gif", respByte, 0666)
 	fmt.Println("Please input your code: ")
 	var code string

@@ -1,0 +1,5 @@
+package scauFight
+
+func recognizeCaptureCode() {
+
+}

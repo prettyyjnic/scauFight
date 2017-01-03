@@ -4,6 +4,7 @@ import "regexp"
 
 import "errors"
 import "log"
+import "strings"
 
 func getViewState(respByte []byte) ([]byte, []byte) {
 	reg := regexp.MustCompile(`<input type="hidden" name="__VIEWSTATE" value="(.*)" />`)
@@ -46,6 +47,7 @@ func (student *StudentStruct) LoginIn() error {
 		"__VIEWSTATE":      string(__VIEWSTATE),
 		// "__VIEWSTATEGENERATOR": string(__VIEWSTATEGENERATOR),
 	}
+
 	respBytes, _, err := post(zhengFang.loginURL, loginData, student.cookies, nil)
 	if err != nil {
 		return err
@@ -54,6 +56,9 @@ func (student *StudentStruct) LoginIn() error {
 	matches := reg.FindSubmatch(respBytes)
 	if len(matches) > 0 {
 		return errors.New("登录失败" + string(matches[0]))
+	}
+	if strings.Contains(string(respBytes), "欢迎使用正方教务管理系统！请登录") {
+		return errors.New("登录失败!")
 	}
 	log.Println("登录成功！")
 	return nil

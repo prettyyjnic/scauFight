@@ -23,6 +23,10 @@
 			"revisionTime": "2015-09-15T16:53:35Z"
 		},
 		{
+			"path": "github.com/goghcrow/capture_easy",
+			"revision": ""
+		},
+		{
 			"checksumSHA1": "WUBkjHxySczF0k62u6kUmvatrJM=",
 			"path": "github.com/larspensjo/config",
 			"revision": "b6db95dc6321c46dab9cd53d0c85164a27686aa6",
@@ -33,6 +37,18 @@
 			"path": "github.com/mozillazg/request",
 			"revision": "27533b4a60c41069f545bacdb23f878e8dae41b2",
 			"revisionTime": "2016-11-07T14:44:08Z"
+		},
+		{
+			"checksumSHA1": "73mwnQ2UhMkyXQ18TZF9jI54Jcw=",
+			"path": "github.com/otiai10/gosseract",
+			"revision": "5e15d71c88a605e6bb3b84f53cc628a66f3b6500",
+			"revisionTime": "2016-12-07T06:31:16Z"
+		},
+		{
+			"checksumSHA1": "lWr+vSk6vqMnkFtR0QLIaR700yo=",
+			"path": "github.com/otiai10/gosseract/tesseract",
+			"revision": "5e15d71c88a605e6bb3b84f53cc628a66f3b6500",
+			"revisionTime": "2016-12-07T06:31:16Z"
 		},
 		{
 			"checksumSHA1": "GIGmSrYACByf5JDIP9ByBZksY80=",
@@ -95,5 +111,5 @@
 			"revisionTime": "2016-11-30T21:25:21Z"
 		}
 	],
-	"rootPath": "github.com/prettyyjnic/scauFight"
+	"rootPath": "github.com/prettyyjnic/scau-fight"
 }

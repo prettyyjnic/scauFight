@@ -7,10 +7,6 @@ import (
 )
 
 func main() {
-	// str := `<input id=".*" type="checkbox" name="(.*)">`
-	// reg := regexp.MustCompile(`<input id=".*" type="checkbox" name="(.*)">`)
-	// matches := reg.FindSubmatch([]byte(str))
-	// fmt.Println(matches[1])
 
 	xuehao, err := scauFight.Config.String("student", "xuehao")
 	if err != nil {
@@ -20,8 +16,33 @@ func main() {
 	if err != nil {
 		panic("密码配置错误！")
 	}
-	className := "中国哲学智慧与现代企业管理"
-	fightClassAUntilSuccess(xuehao, password, className)
+	// className := "中国哲学智慧与现代企业管理"
+
+	courses := []*scauFight.CourseInfo{
+		&scauFight.CourseInfo{
+			CourseName: "植物源化学物质及其应用",
+			CourseTime: "",
+		},
+		&scauFight.CourseInfo{
+			CourseName: "丝绸文化(A系列)",
+			CourseTime: "周三第9,10节",
+		},
+		&scauFight.CourseInfo{
+			CourseName: "生物安全",
+			CourseTime: "周二第9,10节",
+		},
+		&scauFight.CourseInfo{
+			CourseName: "花粉的功能与应用",
+			CourseTime: "周四第11,12",
+		},
+		&scauFight.CourseInfo{
+			CourseName: "微量元素与健康",
+			CourseTime: "",
+		},
+	}
+
+	student := scauFight.NewStudent(xuehao, password)
+	student.FightPublicClassAuto(courses)
 }
 
 func fightWithCode(student *scauFight.StudentStruct) {
@@ -47,38 +68,13 @@ func fightWithClassName(student *scauFight.StudentStruct) error {
 	return err
 }
 
-func fightClassA(student *scauFight.StudentStruct, className string) error {
+func fightClassA(student *scauFight.StudentStruct, className string, courseTime string) error {
 
-	_, err := student.FightPublicClassByClassInfo(className)
+	_, err := student.FightPublicClassByClassInfo(className, "", courseTime)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err.Error())
 	} else {
 		log.Println("抢课成功！")
 	}
 	return err
-}
-
-func fightClassAUntilSuccess(xuehao string, password string, className string) {
-	var channel chan int
-	var maxChannel = 10
-	var successChannel chan int
-	successChannel = make(chan int)
-	channel = make(chan int, maxChannel)
-	for {
-		channel <- 1
-		go func() {
-			defer func() {
-				<-channel
-			}()
-			student := scauFight.NewStudent(xuehao, password)
-			err := fightClassA(student, className)
-			if err == nil {
-				successChannel <- 1
-			}
-		}()
-	}
-
-	for {
-		<-successChannel
-	}
 }

@@ -1,9 +1,14 @@
 package scauFight
 
-import "regexp"
-import "errors"
+import (
+	"bytes"
+	"errors"
+	"regexp"
+	"strings"
+)
+
 import "github.com/PuerkitoBio/goquery"
-import "bytes"
+
 import "log"
 
 const (
@@ -14,6 +19,13 @@ const (
 	// AREA_QILIN 启林
 	AREA_QILIN = "3"
 )
+
+// 课程信息
+type CourseInfo struct {
+	CourseName  string
+	CourseTime  string
+	TeacherName string
+}
 
 // GetChineseClass 获取语文课信息
 func (student *StudentStruct) GetChineseClass() ([]byte, error) {
@@ -137,10 +149,10 @@ func (student *StudentStruct) FightPublicClassByClassInfo(args ...string) ([]byt
 		}
 	}
 	respBytes, err := student.GetPublicClass() // 获取__VIEWSTATE 和 __VIEWSTATEGENERATOR
-	log.Println("获取公选课成功")
 	if err != nil {
 		return nil, err
 	}
+	log.Println("获取公选课成功")
 	__VIEWSTATE, __VIEWSTATEGENERATOR = getViewState(respBytes)
 	// 查找课程
 	headers := map[string]string{
@@ -212,7 +224,7 @@ func getChineseClassCodeByClassInfo(resp []byte, className string, teacherName s
 					return
 				}
 			case 2:
-				if courseTime != "" && courseTime != td.First().Text() {
+				if courseTime != "" && !strings.Contains(td.First().Text(), courseTime) {
 					isMatch = false
 					return
 				}
@@ -256,7 +268,7 @@ func getPublicClassCodeByClassInfo(resp []byte, className string, teacherName st
 					return
 				}
 			case 5:
-				if courseTime != "" && courseTime != td.First().Text() {
+				if courseTime != "" && !strings.Contains(td.Text(), courseTime) {
 					classCode = ""
 					return
 				}
