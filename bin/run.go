@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/prettyyjnic/scau-fight"
+	"github.com/prettyyjnic/scauFight"
 )
 
 func main() {
