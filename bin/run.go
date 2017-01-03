@@ -16,7 +16,6 @@ func main() {
 	if err != nil {
 		panic("密码配置错误！")
 	}
-	// className := "中国哲学智慧与现代企业管理"
 
 	courses := []*scauFight.CourseInfo{
 		&scauFight.CourseInfo{
