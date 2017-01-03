@@ -11,18 +11,20 @@ type StudentStruct struct {
 	password             string
 	__VIEWSTATE          string
 	__VIEWSTATEGENERATOR string
-	cookies              []*http.Cookie
+	requestClient        *http.Client
+	isLogin              bool
 }
 
 func NewStudent(xuehao string, password string) *StudentStruct {
 	stu := &StudentStruct{}
 	stu.xuehao = xuehao
 	stu.password = password
+	stu.requestClient = new(http.Client)
 	return stu
 }
 
 func (student *StudentStruct) LoginOut() {
-	student.cookies = nil
+	student.isLogin = false
 }
 
 func (student *StudentStruct) FightPublicClassAuto(courses []*CourseInfo) {
@@ -30,17 +32,27 @@ func (student *StudentStruct) FightPublicClassAuto(courses []*CourseInfo) {
 		for {
 			if _, err := student.FightPublicClassByClassInfo(courseInfo.CourseName, courseInfo.TeacherName, courseInfo.CourseTime); err != nil {
 				log.Println("error :", err.Error())
-				if strings.Contains(err.Error(), "上课时间冲突") || strings.Contains(err.Error(), "选课门数超过限制") {
+				var shouldBreak = false
+				for i := 0; i < len(limitRequestStrings); i++ {
+					if strings.Contains(err.Error(), limitRequestStrings[i]) {
+						shouldBreak = true
+						break
+					}
+				}
+				if shouldBreak {
 					break
 				}
-				if strings.Contains(err.Error(), "请重新登陆") || strings.Contains(err.Error(), "Object moved") || strings.Contains(err.Error(), "logout.aspx") || strings.Contains(err.Error(), "登录失败") {
-					student.LoginOut()
-					log.Println("退出登录")
+				for i := 0; i < len(timeoutRequestStrings); i++ {
+					if strings.Contains(err.Error(), timeoutRequestStrings[i]) {
+						student.LoginOut()
+						log.Println("登录超时")
+					}
 				}
 			} else {
 				log.Println("抢课" + courseInfo.CourseName + "成功！")
 				break
 			}
 		}
+
 	}
 }

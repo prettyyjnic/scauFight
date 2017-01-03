@@ -17,18 +17,16 @@ import (
 )
 
 var (
-	c   *http.Client
 	enc mahonia.Encoder
 	dec mahonia.Decoder
 )
 
 func init() {
-	c = new(http.Client)
 	enc = mahonia.NewEncoder("GBK")
 	dec = mahonia.NewDecoder("GBK")
 }
 
-func doRequest(url string, method string, data map[string]string, cookies []*http.Cookie, headers map[string]string) ([]byte, []*http.Cookie, error) {
+func doRequest(c *http.Client, url string, method string, data map[string]string, cookies []*http.Cookie, headers map[string]string) ([]byte, []*http.Cookie, error) {
 	req := request.NewRequest(c)
 	req.Headers = headers
 	req.Data = make(map[string]string)
@@ -75,15 +73,7 @@ func doRequest(url string, method string, data map[string]string, cookies []*htt
 }
 
 func checkResult(respBytes []byte) error {
-	unCorrectBytes := [][]byte{
-		[]byte("三秒防刷"),
-		[]byte("出错啦"),
-		[]byte("请重新登陆"),
-		[]byte("Object moved"),
-		[]byte("Service Unavailable"),
-		[]byte("Location: /logout.aspx"),
-	}
-	for _, v := range unCorrectBytes {
+	for _, v := range unCorrectRequestBytes {
 		if bytes.Contains(respBytes, v) {
 			return errors.New("正方发生错误" + string(v))
 		}
@@ -92,15 +82,15 @@ func checkResult(respBytes []byte) error {
 	return nil
 }
 
-func get(url string, data map[string]string, cookies []*http.Cookie, headers map[string]string) ([]byte, []*http.Cookie, error) {
-	return doRequest(url, "GET", data, cookies, headers)
+func get(c *http.Client, url string, data map[string]string, cookies []*http.Cookie, headers map[string]string) ([]byte, []*http.Cookie, error) {
+	return doRequest(c, url, "GET", data, cookies, headers)
 }
 
-func post(url string, data map[string]string, cookies []*http.Cookie, headers map[string]string) ([]byte, []*http.Cookie, error) {
-	return doRequest(url, "POST", data, cookies, headers)
+func post(c *http.Client, url string, data map[string]string, cookies []*http.Cookie, headers map[string]string) ([]byte, []*http.Cookie, error) {
+	return doRequest(c, url, "POST", data, cookies, headers)
 }
 
-func getCode(codeURL string, cookies []*http.Cookie) (string, error) {
+func getCode(c *http.Client, codeURL string, cookies []*http.Cookie) (string, error) {
 	req := request.NewRequest(c)
 	req.Cookies = make(map[string]string)
 	for _, cookie := range cookies {
@@ -115,6 +105,9 @@ func getCode(codeURL string, cookies []*http.Cookie) (string, error) {
 	// fmt.Println("respByte", string(respByte))
 	if strings.Contains(string(respByte), "Service Unavailable") {
 		return "", errors.New("正方发生错误Service Unavailable")
+	}
+	if !strings.Contains(string(respByte), "GIF") {
+		return "", errors.New("获取验证码失败")
 	}
 	ioutil.WriteFile("code.gif", respByte, 0666)
 	fmt.Println("Please input your code: ")

@@ -18,6 +18,31 @@ var zhengFang struct {
 }
 var Config *config.Config
 
+// 正方返回错误的 bytes 数组
+var unCorrectRequestBytes = [][]byte{
+	[]byte("三秒防刷"),
+	[]byte("出错啦"),
+	[]byte("请重新登陆"),
+	[]byte("登录失败"),
+	[]byte("Object moved"),
+	[]byte("Service Unavailable"),
+	[]byte("Location: /logout.aspx"),
+}
+
+// 超时
+var timeoutRequestStrings = []string{
+	"Object moved",
+	"Location: /logout.aspx",
+	"请重新登陆",
+	"登录失败",
+}
+
+// 上课时间冲突或者超过限制
+var limitRequestStrings = []string{
+	"上课时间冲突",
+	"选课门数超过限制",
+}
+
 func init() {
 	var err error
 	configFile := flag.String("configfile", "./config.ini", "General configuration file")

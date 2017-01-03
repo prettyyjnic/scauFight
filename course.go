@@ -29,7 +29,7 @@ type CourseInfo struct {
 
 // GetChineseClass 获取语文课信息
 func (student *StudentStruct) GetChineseClass() ([]byte, error) {
-	if student.cookies == nil || len(student.cookies) == 0 {
+	if !student.isLogin {
 		err := student.LoginIn()
 		if err != nil {
 			return nil, err
@@ -38,7 +38,7 @@ func (student *StudentStruct) GetChineseClass() ([]byte, error) {
 	headers := map[string]string{
 		"Referer": zhengFang.mainURL + student.xuehao,
 	}
-	respBytes, _, err := get(zhengFang.chineseURL+student.xuehao, nil, student.cookies, headers)
+	respBytes, _, err := get(student.requestClient, zhengFang.chineseURL+student.xuehao, nil, nil, headers)
 	return respBytes, err
 }
 
@@ -94,7 +94,7 @@ func (student *StudentStruct) fightChineseClass(resp []byte, classCode string) (
 		"Referer":                   zhengFang.chineseURL + student.xuehao,
 		"Upgrade-Insecure-Requests": "1",
 	}
-	resp, _, err = post(zhengFang.chineseURL+student.xuehao, params, student.cookies, headers)
+	resp, _, err = post(student.requestClient, zhengFang.chineseURL+student.xuehao, params, nil, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (student *StudentStruct) fightChineseClass(resp []byte, classCode string) (
 
 // GetPublicClass 获取A系列课程信息
 func (student *StudentStruct) GetPublicClass() ([]byte, error) {
-	if student.cookies == nil || len(student.cookies) == 0 {
+	if !student.isLogin {
 		err := student.LoginIn()
 		if err != nil {
 			return nil, err
@@ -118,7 +118,7 @@ func (student *StudentStruct) GetPublicClass() ([]byte, error) {
 	headers := map[string]string{
 		"Referer": zhengFang.mainURL + student.xuehao,
 	}
-	respBytes, _, err := get(zhengFang.publicClassURL+student.xuehao, nil, student.cookies, headers)
+	respBytes, _, err := get(student.requestClient, zhengFang.publicClassURL+student.xuehao, nil, nil, headers)
 	return respBytes, err
 }
 
@@ -170,7 +170,7 @@ func (student *StudentStruct) FightPublicClassByClassInfo(args ...string) ([]byt
 		"__VIEWSTATEGENERATOR": string(__VIEWSTATEGENERATOR),
 	}
 	log.Println("查找公选课" + className)
-	respBytes, _, err = post(zhengFang.publicClassURL+student.xuehao, params, student.cookies, headers)
+	respBytes, _, err = post(student.requestClient, zhengFang.publicClassURL+student.xuehao, params, nil, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (student *StudentStruct) FightPublicClassByClassInfo(args ...string) ([]byt
 		"Button1": "提交",
 	}
 	log.Println("发送选课请求")
-	respBytes, _, err = post(zhengFang.publicClassURL+student.xuehao, params2, student.cookies, headers)
+	respBytes, _, err = post(student.requestClient, zhengFang.publicClassURL+student.xuehao, params2, nil, headers)
 	if err != nil {
 		return nil, err
 	}

@@ -19,19 +19,18 @@ func getViewState(respByte []byte) ([]byte, []byte) {
 	if len(matches2) > 1 {
 		__VIEWSTATEGENERATOR = matches2[1]
 	}
-
 	return __VIEWSTATE, __VIEWSTATEGENERATOR
 }
 
 func (student *StudentStruct) LoginIn() error {
 	// 获取cookie
-	resp, cookies, err := get(zhengFang.loginURL, nil, nil, nil)
+	resp, _, err := get(student.requestClient, zhengFang.loginURL, nil, nil, nil)
 	if err != nil {
 		return err
 	}
 	__VIEWSTATE, _ := getViewState(resp)
-	student.cookies = cookies
-	code, err := getCode(zhengFang.codeURL, student.cookies)
+
+	code, err := getCode(student.requestClient, zhengFang.codeURL, nil)
 	if err != nil {
 		return err
 	}
@@ -48,18 +47,19 @@ func (student *StudentStruct) LoginIn() error {
 		// "__VIEWSTATEGENERATOR": string(__VIEWSTATEGENERATOR),
 	}
 
-	respBytes, _, err := post(zhengFang.loginURL, loginData, student.cookies, nil)
+	respBytes, _, err := post(student.requestClient, zhengFang.loginURL, loginData, nil, nil)
 	if err != nil {
 		return err
 	}
 	reg := regexp.MustCompile(`<script language='javascript' defer>alert\('(.*)'\);`)
 	matches := reg.FindSubmatch(respBytes)
 	if len(matches) > 0 {
-		return errors.New("登录失败" + string(matches[0]))
+		return errors.New("登录失败" + string(matches[1]))
 	}
 	if strings.Contains(string(respBytes), "欢迎使用正方教务管理系统！请登录") {
 		return errors.New("登录失败!")
 	}
 	log.Println("登录成功！")
+	student.isLogin = true
 	return nil
 }
