@@ -20,29 +20,34 @@ func main() {
 
 	courses := []*scauFight.CourseInfo{
 		&scauFight.CourseInfo{
-			CourseName: "植物源化学物质及其应用",
-			CourseTime: "",
+			CourseName:  "植物源化学物质及其应用",
+			TeacherName: "",
+			CourseTime:  "",
 		},
 		&scauFight.CourseInfo{
-			CourseName: "丝绸文化(A系列)",
-			CourseTime: "周三第9,10节",
+			CourseName:  "丝绸文化(A系列)",
+			TeacherName: "",
+			CourseTime:  "周三第9,10节",
 		},
 		&scauFight.CourseInfo{
-			CourseName: "生物安全",
-			CourseTime: "周二第9,10节",
+			CourseName:  "生物安全",
+			TeacherName: "",
+			CourseTime:  "周二第9,10节",
 		},
 		&scauFight.CourseInfo{
-			CourseName: "花粉的功能与应用",
-			CourseTime: "周四第11,12",
+			CourseName:  "花粉的功能与应用",
+			TeacherName: "",
+			CourseTime:  "周四第11,12",
 		},
 		&scauFight.CourseInfo{
-			CourseName: "微量元素与健康",
-			CourseTime: "",
+			CourseName:  "微量元素与健康",
+			TeacherName: "",
+			CourseTime:  "",
 		},
 	}
 
 	student := scauFight.NewStudent(xuehao, password)
-	student.FightPublicClassAuto(courses)
+	student.FightPublicClassAuto(courses) // 自动抢课模式，但是要人工输入登录验证码
 }
 
 func fightWithCode(student *scauFight.StudentStruct) {
